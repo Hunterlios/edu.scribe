@@ -13,6 +13,7 @@ const config: Config = {
         "hero-background": "url('/hero-background.svg')",
       },
       colors: {
+        "background-light": "#f8fafc",
         "logo-green": "#6DA544",
         "logo-blue": "#0052B4",
         "logo-red": "#D80027",

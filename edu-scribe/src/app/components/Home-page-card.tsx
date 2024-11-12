@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function HomePageCard({ imgNumber }: { imgNumber: number }) {
   return (
-    <div className="w-[400px] h-[490px]">
+    <div className="w-[400px] h-[490px] hover:scale-105 hover:shadow-lg transform ease-in-out duration-500 bg-background-light">
       <div>
         <Image
           src={`/card-img-${imgNumber}.svg`}
