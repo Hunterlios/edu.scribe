@@ -1,8 +1,11 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import PasswordInput from "@/app/components/PasswordInput";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,20 +17,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import Logo from "../components/Logo";
 
-//TODO: Walidacja formularza
 const formSchema = z.object({
-  email: z.string().min(2, {
-    message: "Email must be at least 2 characters.",
+  email: z.string().email({
+    message: "This is not a valid email.",
   }),
-  password: z.string().min(2, {
-    message: "Password must be at least 2 characters.",
-  }),
+  password: z
+    .string()
+    .min(2, "Password must be at least 8 characters")
+    .max(20, "Password must be at most 20 characters"),
 });
 
 export default function Login() {
+  const [error, setError] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,10 +42,29 @@ export default function Login() {
       password: "",
     },
   });
+  const router = useRouter();
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        setError(true);
+        return;
+      }
+
+      router.push("/platform");
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
+
   return (
     <div className="h-screen w-auto">
       <div className="w-full h-full flex justify-center items-center">
@@ -50,13 +76,21 @@ export default function Login() {
             alt="Picture of the author"
           />
         </div>
-        <div className="z-10 bg-white w-[700px] h-[500px] flex flex-col justify-center items-center shadow-xl rounded-xl">
+        <div className="z-10 bg-white outline outline-dark/5 w-[700px] h-[550px] flex flex-col justify-center items-center shadow-xl rounded-xl">
           <div className="w-full px-40">
             {/* Dodanie stylowania logo */}
             <div className="flex flex-row justify-center mb-10">
               <Logo />
             </div>
-
+            {error ? (
+              <Alert variant="destructive" className="mb-2">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle className="text-logo-red">Error</AlertTitle>
+                <AlertDescription>
+                  Wrong email or password. Please try again.
+                </AlertDescription>
+              </Alert>
+            ) : null}
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -69,7 +103,7 @@ export default function Login() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="Email" {...field} />
+                        <Input {...field} placeholder="Email" />
                       </FormControl>
                       <FormDescription>
                         Enter your email address
@@ -84,8 +118,8 @@ export default function Login() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Password" {...field} />
+                      <FormControl {...field}>
+                        <PasswordInput field={field} placeholder="Password" />
                       </FormControl>
                       <FormDescription>Enter your password</FormDescription>
                       <FormMessage />
@@ -93,11 +127,18 @@ export default function Login() {
                   )}
                 />
                 <div className="flex flex-row justify-between">
-                  <Button className="w-[120px]" type="submit">
+                  <Button className="w-[120px] h-[40px]" type="submit">
                     Login
                   </Button>
-                  <Button className="w-[120px]" variant="outline">
-                    Get access
+                  <Button
+                    className="w-[120px] h-[40px]"
+                    variant="outline"
+                    type="button"
+                    asChild
+                  >
+                    <Link className="" href="/register">
+                      Get access
+                    </Link>
                   </Button>
                 </div>
               </form>

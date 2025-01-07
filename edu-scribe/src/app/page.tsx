@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "./components/Logo";
-import HomePageCard from "./components/Home-page-card";
+import HomePageCard from "./components/HomePageCard";
 import {
   Dialog,
   DialogContent,
@@ -65,9 +65,9 @@ export default function Home() {
               </li>
             </ul>
           </nav>
-          <Button size={"lg"} className="text-background-light w-auto px-0">
+          <Button size={"lg"} className="w-[130px] h-[40px]" asChild>
             <Link
-              className="text-background-light flex items-center justify-center gap-2 px-8 h-full"
+              className="text-background-light flex items-center justify-center gap-2"
               href="/login"
             >
               <ChevronRight /> Login
@@ -117,8 +117,13 @@ export default function Home() {
             language learning enjoyable and effective, helping you achieve
             fluency with ease.
           </p>
-          <Button size={"lg"} className="text-xl font-medium px-14 py-8">
-            Try out
+          <Button size={"lg"} className="w-[200px] h-[70px]" asChild>
+            <Link
+              className="text-background-light text-xl font-medium flex items-center justify-center"
+              href="/register"
+            >
+              Try out
+            </Link>
           </Button>
           <Image
             src="/about-us-image.svg"
@@ -136,8 +141,13 @@ export default function Home() {
             Discover expertly crafted language courses designed to suit every
             learning style and level.
           </p>
-          <Button size={"lg"} className="text-xl font-medium px-14 py-8">
-            Try out
+          <Button size={"lg"} className="w-[200px] h-[70px]" asChild>
+            <Link
+              className="text-background-light text-xl font-medium flex items-center justify-center"
+              href="/register"
+            >
+              Try out
+            </Link>
           </Button>
           <div className="flex flex-row gap-8">
             <HomePageCard imgNumber={1} />
@@ -190,9 +200,15 @@ export default function Home() {
                   <Button
                     type="button"
                     variant="default"
-                    className="bg-logo-blue w-[200px] h-[70px] text-lg hover:bg-blue-900"
+                    className="bg-logo-blue w-[200px] h-[70px] hover:bg-blue-900"
+                    asChild
                   >
-                    Get access
+                    <Link
+                      className="text-background-light text-xl"
+                      href="/register"
+                    >
+                      Get access
+                    </Link>
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -231,9 +247,15 @@ export default function Home() {
                   <Button
                     type="button"
                     variant="default"
-                    className="bg-logo-red w-[200px] h-[70px] text-lg hover:bg-red-800"
+                    className="bg-logo-red w-[200px] h-[70px] hover:bg-red-800"
+                    asChild
                   >
-                    Get access
+                    <Link
+                      className="text-background-light text-xl"
+                      href="/register"
+                    >
+                      Get access
+                    </Link>
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -272,9 +294,15 @@ export default function Home() {
                   <Button
                     type="button"
                     variant="default"
-                    className="bg-logo-green w-[200px] h-[70px] text-lg hover:bg-green-800"
+                    className="bg-logo-green w-[200px] h-[70px] hover:bg-green-800"
+                    asChild
                   >
-                    Get access
+                    <Link
+                      className="text-background-light text-xl"
+                      href="/register"
+                    >
+                      Get access
+                    </Link>
                   </Button>
                 </DialogFooter>
               </DialogContent>
