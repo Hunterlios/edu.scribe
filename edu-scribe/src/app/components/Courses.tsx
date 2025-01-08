@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -45,8 +46,8 @@ export default function Courses() {
                 />
                 <p className="text-center">
                   Master English with courses designed by our expert teachers.
-                  Access a range of lessons, complete interactive exercises,
-                  and earn points as you progress. Study at your own pace with
+                  Access a range of lessons, complete interactive exercises, and
+                  earn points as you progress. Study at your own pace with
                   materials that help you improve your skills step by step.
                 </p>
               </div>
@@ -54,9 +55,15 @@ export default function Courses() {
                 <Button
                   type="button"
                   variant="default"
-                  className="bg-logo-blue w-[200px] h-[70px] text-lg hover:bg-blue-900"
+                  className="bg-logo-blue w-[200px] h-[70px] hover:bg-blue-900"
+                  asChild
                 >
-                  Get access
+                  <Link
+                    className="text-background-light text-xl"
+                    href="/register"
+                  >
+                    Get access
+                  </Link>
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -86,8 +93,8 @@ export default function Courses() {
                 />
                 <p className="text-center">
                   Master Spanish with courses designed by our expert teachers.
-                  Access a range of lessons, complete interactive exercises,
-                  and earn points as you progress. Study at your own pace with
+                  Access a range of lessons, complete interactive exercises, and
+                  earn points as you progress. Study at your own pace with
                   materials that help you improve your skills step by step.
                 </p>
               </div>
@@ -95,9 +102,15 @@ export default function Courses() {
                 <Button
                   type="button"
                   variant="default"
-                  className="bg-logo-red w-[200px] h-[70px] text-lg hover:bg-red-800"
+                  className="bg-logo-red w-[200px] h-[70px] hover:bg-red-800"
+                  asChild
                 >
-                  Get access
+                  <Link
+                    className="text-background-light text-xl"
+                    href="/register"
+                  >
+                    Get access
+                  </Link>
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -127,8 +140,8 @@ export default function Courses() {
                 />
                 <p className="text-center">
                   Master Italian with courses designed by our expert teachers.
-                  Access a range of lessons, complete interactive exercises,
-                  and earn points as you progress. Study at your own pace with
+                  Access a range of lessons, complete interactive exercises, and
+                  earn points as you progress. Study at your own pace with
                   materials that help you improve your skills step by step.
                 </p>
               </div>
@@ -136,9 +149,15 @@ export default function Courses() {
                 <Button
                   type="button"
                   variant="default"
-                  className="bg-logo-green w-[200px] h-[70px] text-lg hover:bg-green-800"
+                  className="bg-logo-green w-[200px] h-[70px] hover:bg-green-800"
+                  asChild
                 >
-                  Get access
+                  <Link
+                    className="text-background-light text-xl"
+                    href="/register"
+                  >
+                    Get access
+                  </Link>
                 </Button>
               </DialogFooter>
             </DialogContent>

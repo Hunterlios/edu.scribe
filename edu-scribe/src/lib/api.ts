@@ -792,3 +792,39 @@ export async function AddQuiz(token: string, courseId: number, name: string) {
     throw error;
   }
 }
+
+export async function GetQuizById(token: string, id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/quizes/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Could not fetch quiz");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}
+
+export async function GetByQuizId(token: string, id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/exercises/quiz/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Could not fetch exercises by quiz id");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}

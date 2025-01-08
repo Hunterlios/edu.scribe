@@ -664,7 +664,7 @@ export default function Page({}) {
             </div>
             <Separator className="my-10" />
 
-            <div className=" flex flex-row gap-2">
+            <div className="flex flex-row gap-2">
               <ScrollArea className="max-h-[300px] w-full pr-3">
                 <div>
                   <div className="sticky pb-4 top-0 bg-white z-10">

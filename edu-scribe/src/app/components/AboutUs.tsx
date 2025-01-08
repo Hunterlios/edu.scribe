@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import Image from "next/image";
 
 export default function AboutUs() {
@@ -16,11 +17,16 @@ export default function AboutUs() {
             <span className="text-dark">.scribe</span>
           </span>
           , we specialize in providing top-tier courses. Our goal is to make
-          language learning enjoyable and effective, helping you achieve
-          fluency with ease.
+          language learning enjoyable and effective, helping you achieve fluency
+          with ease.
         </p>
-        <Button size={"lg"} className="text-xl font-medium px-14 py-8">
-          Try out
+        <Button size={"lg"} className="w-[200px] h-[70px]" asChild>
+          <Link
+            className="text-background-light text-xl font-medium flex items-center justify-center"
+            href="/register"
+          >
+            Try out
+          </Link>
         </Button>
         <Image
           src="/about-us-image.svg"
