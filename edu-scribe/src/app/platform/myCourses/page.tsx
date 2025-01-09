@@ -11,6 +11,7 @@ import { useCurrentUserContext } from "../../currentUserProvider";
 export default function MyCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
   const currentUser = useCurrentUserContext();
+
   const fetchMyCoursesTeacher = async () => {
     try {
       const response = await fetch("/api/courses/myCoursesTeacher", {
@@ -21,17 +22,41 @@ export default function MyCourses() {
       });
 
       if (!response.ok) {
-        console.error("Couldn't fetch students.");
+        console.error("Couldn't fetch courses.");
       }
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Registration failed:", error);
+      console.error("Fetch failed:", error);
+    }
+  };
+
+  const fetchMyCoursesUser = async () => {
+    try {
+      const response = await fetch("/api/courses/myCourses", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Couldn't fetch courses.");
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Fetch failed:", error);
     }
   };
   useEffect(() => {
     if (currentUser?.role === "TEACHER") {
       fetchMyCoursesTeacher().then((data) => {
+        setCourses(data);
+      });
+    }
+    if (currentUser?.role === "USER") {
+      fetchMyCoursesUser().then((data) => {
         setCourses(data);
       });
     }
@@ -43,7 +68,7 @@ export default function MyCourses() {
   }
   return (
     <div className="py-10 px-10 grid grid-cols-12 gap-10">
-      <div className="col-span-6">
+      <div className="col-span-8">
         <div className="flex gap-3 mb-5">
           <BookCopy size={25} />
           <h1 className="text-xl font-semibold">My courses</h1>
@@ -56,9 +81,6 @@ export default function MyCourses() {
       </div>
       <div className="flex justify-center">
         <Separator orientation="vertical" className="h-[760px] col-span-1" />
-      </div>
-      <div className="col-span-5">
-        <div className="flex flex-col items-end">CHART 1</div>
       </div>
 
       <div className="absolute right-0 bottom-0">

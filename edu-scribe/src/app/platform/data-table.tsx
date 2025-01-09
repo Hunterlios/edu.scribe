@@ -18,13 +18,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { id?: number }, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -57,7 +58,7 @@ export function DataTable<TData, TValue>({
                   return (
                     <TableHead
                       key={header.id}
-                      className={header.id === "status" ? "text-center" : ""}
+                      className={header.id === "actions" ? "text-center" : ""}
                     >
                       {header.isPlaceholder
                         ? null
@@ -77,21 +78,31 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="text-background-light"
+                  className="text-background-light cursor-pointer"
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className={
-                        cell.column.id === "status" ? "text-center" : ""
-                      }
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) =>
+                    cell.id === `${row.id}_actions` ? (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ) : (
+                      <Link
+                        href={`/platform/courses?course=${row.original.id}`}
+                        key={cell.id}
+                        legacyBehavior
+                      >
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      </Link>
+                    )
+                  )}
                 </TableRow>
               ))
             ) : (
@@ -100,7 +111,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center text-background-light/50"
                 >
-                  No results.
+                  No courses.
                 </TableCell>
               </TableRow>
             )}

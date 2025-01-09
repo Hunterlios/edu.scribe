@@ -91,7 +91,7 @@ export default function Register() {
                 <AlertCircle className="h-4 w-4" color="#6DA544" />
                 <AlertTitle className="text-logo-green">Success</AlertTitle>
                 <AlertDescription className="text-logo-green">
-                  Teacher registered successfully.
+                  Registered successfully.
                 </AlertDescription>
               </Alert>
             ) : null}
@@ -100,7 +100,7 @@ export default function Register() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle className="text-logo-red">Error</AlertTitle>
                 <AlertDescription>
-                  Couldn't register teacher. Please try again.
+                  Couldn't register. Please try again.
                 </AlertDescription>
               </Alert>
             ) : null}

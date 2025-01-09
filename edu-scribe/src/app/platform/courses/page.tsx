@@ -148,6 +148,7 @@ export default function Page({}) {
   const [course, setCourse] = useState<Course | null>(null);
   const [isTeacherCourse, setIsTeacherCourse] = useState<boolean | null>(null);
   const [participants, setParticipants] = useState<Participant[] | null>(null);
+  const [isUserCourse, setIsUserCourse] = useState<boolean | null>(null);
   const [courseResources, setCourseResources] = useState<
     CourseResource[] | null
   >(null);
@@ -194,6 +195,25 @@ export default function Page({}) {
   const fetchMyCoursesTeacher = async () => {
     try {
       const response = await fetch("/api/courses/myCoursesTeacher", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Couldn't fetch my courses.");
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Courses fetch failed:", error);
+    }
+  };
+
+  const fetchMyCoursesUser = async () => {
+    try {
+      const response = await fetch("/api/courses/myCourses", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -566,12 +586,49 @@ export default function Page({}) {
         const dayName = data.date.split(" ")[0];
         setDate(getWeekdayNumber(dayName));
       });
+    } else if (currentUser.role === "USER") {
+      fetchCourse().then((data) => {
+        if (data !== null) {
+          setCourse(data);
+          const dayName = data.date.split(" ")[0];
+          setDate(getWeekdayNumber(dayName));
+        } else {
+          window.location.href = "/platform/coursesList";
+        }
+      });
+      fetchMyCoursesUser().then((data) => {
+        if (data) {
+          const checkCourse: Course | undefined = data.find(
+            (course: Course) => course.id === Number(courseId)
+          );
+          if (checkCourse) {
+            setIsUserCourse(true);
+            fetchParticipants().then((data) => {
+              setParticipants(data);
+            });
+            fetchCourseResources().then((data) => {
+              setCourseResources(data);
+            });
+            fetchQuizzes().then((data) => {
+              setQuizzes(data);
+            });
+            fetchTasks().then((data) => {
+              setTasks(data);
+            });
+          }
+        }
+      });
     }
   }, []);
 
-  if (currentUser.role !== "TEACHER" || !isTeacherCourse) {
+  if (
+    currentUser.role === "ADMIN" ||
+    (currentUser.role === "USER" && !isUserCourse) ||
+    (currentUser.role === "TEACHER" && !isTeacherCourse)
+  ) {
     return (
       course?.id &&
+      !isUserCourse &&
       !isTeacherCourse && (
         <div className="py-10 px-10 flex flex-col gap-4 h-full w-full justify-center items-center">
           <h1 className="text-4xl font-semibold text-nowrap">
@@ -588,7 +645,7 @@ export default function Page({}) {
             <h2 className="text-dark/80">{course?.date}</h2>
           </div>
           <Separator className="my-5 w-[400px]" />
-          {currentUser.role === "STUDENT" && (
+          {currentUser.role === "USER" && (
             <Button variant={"default"} onClick={handleApplyForCourse}>
               Apply for course
             </Button>
@@ -606,11 +663,8 @@ export default function Page({}) {
     );
   }
 
-  return (
-    course?.id &&
-    isTeacherCourse &&
-    participants &&
-    participants.length >= 0 && (
+  if (course && participants && (isTeacherCourse || isUserCourse)) {
+    return (
       <div className="py-10 px-10 flex flex-row gap-10 h-full w-full">
         <div className="w-full h-full flex flex-col gap-3 mb-3 max-w-[300px] text-nowrap">
           <h1 className="text-2xl font-semibold text-nowrap">
@@ -731,125 +785,127 @@ export default function Page({}) {
             <TabsContent value="lessons">
               <div className="flex flex-row justify-between items-center mb-10">
                 <h1 className="text-2xl font-semibold text-nowrap">Lessons</h1>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant={"default"}>Add new lesson</Button>
-                  </DialogTrigger>
-                  <DialogContent className="!max-w-[800px]">
-                    <DialogHeader>
-                      <DialogTitle>Add task to new lesson</DialogTitle>
-                      <DialogDescription></DialogDescription>
-                      {success ? (
-                        <Alert
-                          variant="default"
-                          className="mb-2 border-logo-green"
-                        >
-                          <AlertCircle className="h-4 w-4" color="#6DA544" />
-                          <AlertTitle className="text-logo-green">
-                            Success
-                          </AlertTitle>
-                          <AlertDescription className="text-logo-green">
-                            Task added successfully.
-                          </AlertDescription>
-                        </Alert>
-                      ) : null}
-                      {error ? (
-                        <Alert variant="destructive" className="mb-2">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertTitle className="text-logo-red">
-                            Error
-                          </AlertTitle>
-                          <AlertDescription>
-                            Couldn't add task. Please try again.
-                          </AlertDescription>
-                        </Alert>
-                      ) : null}
+                {currentUser?.role === "TEACHER" && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant={"default"}>Add new lesson</Button>
+                    </DialogTrigger>
+                    <DialogContent className="!max-w-[800px]">
+                      <DialogHeader>
+                        <DialogTitle>Add task to new lesson</DialogTitle>
+                        <DialogDescription></DialogDescription>
+                        {success ? (
+                          <Alert
+                            variant="default"
+                            className="mb-2 border-logo-green"
+                          >
+                            <AlertCircle className="h-4 w-4" color="#6DA544" />
+                            <AlertTitle className="text-logo-green">
+                              Success
+                            </AlertTitle>
+                            <AlertDescription className="text-logo-green">
+                              Task added successfully.
+                            </AlertDescription>
+                          </Alert>
+                        ) : null}
+                        {error ? (
+                          <Alert variant="destructive" className="mb-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle className="text-logo-red">
+                              Error
+                            </AlertTitle>
+                            <AlertDescription>
+                              Couldn't add task. Please try again.
+                            </AlertDescription>
+                          </Alert>
+                        ) : null}
 
-                      <Form {...taskForm}>
-                        <form
-                          onSubmit={taskForm.handleSubmit(onSubmitTask)}
-                          className="space-y-8"
-                        >
-                          <FormField
-                            control={taskForm.control}
-                            name="contents"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Task</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Task"
-                                    onChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={taskForm.control}
-                            name="deadline"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-col">
-                                <FormLabel>Deadline</FormLabel>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                          "w-[240px] pl-3 text-left font-normal",
-                                          !selected && "text-muted-foreground"
-                                        )}
-                                      >
-                                        {selected ? (
-                                          format(selected, "PPP")
-                                        ) : (
-                                          <span>Pick a date</span>
-                                        )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent
-                                    className="w-auto p-0"
-                                    align="start"
-                                  >
-                                    <Label className="flex flex-row gap-2 text-nowrap items-center p-2">
-                                      Set time:
-                                      <Input
-                                        type="time"
-                                        className="pointer-events-auto w-auto"
-                                        value={timeValue}
-                                        onChange={handleTimeChange}
-                                      />
-                                    </Label>
-                                    <Calendar
-                                      mode="single"
-                                      className="pointer-events-auto"
-                                      selected={selected}
-                                      onSelect={handleDaySelect}
-                                      //disabled={(date) => date < new Date()}
-                                      initialFocus
+                        <Form {...taskForm}>
+                          <form
+                            onSubmit={taskForm.handleSubmit(onSubmitTask)}
+                            className="space-y-8"
+                          >
+                            <FormField
+                              control={taskForm.control}
+                              name="contents"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Task</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Task"
+                                      onChange={field.onChange}
                                     />
-                                  </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <Button className="w-[120px]" type="submit">
-                            Add task
-                          </Button>
-                        </form>
-                      </Form>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={taskForm.control}
+                              name="deadline"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel>Deadline</FormLabel>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <FormControl>
+                                        <Button
+                                          variant={"outline"}
+                                          className={cn(
+                                            "w-[240px] pl-3 text-left font-normal",
+                                            !selected && "text-muted-foreground"
+                                          )}
+                                        >
+                                          {selected ? (
+                                            format(selected, "PPP")
+                                          ) : (
+                                            <span>Pick a date</span>
+                                          )}
+                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                      </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                      className="w-auto p-0"
+                                      align="start"
+                                    >
+                                      <Label className="flex flex-row gap-2 text-nowrap items-center p-2">
+                                        Set time:
+                                        <Input
+                                          type="time"
+                                          className="pointer-events-auto w-auto"
+                                          value={timeValue}
+                                          onChange={handleTimeChange}
+                                        />
+                                      </Label>
+                                      <Calendar
+                                        mode="single"
+                                        className="pointer-events-auto"
+                                        selected={selected}
+                                        onSelect={handleDaySelect}
+                                        disabled={(date) => date < new Date()}
+                                        initialFocus
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <Button className="w-[120px]" type="submit">
+                              Add task
+                            </Button>
+                          </form>
+                        </Form>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
 
               <div className="w-full mt-10">
-                {unsolvedTasks && lateSolvedTasks && (
+                {
                   <ScrollArea className="h-[640px] w-full pr-4">
                     {tasks?.map((task, index) => (
                       <LessonCard
@@ -857,10 +913,13 @@ export default function Page({}) {
                         keyId={index + 1}
                         task={task}
                         userRole={currentUser?.role || ""}
-                        studentsUnsolvedTasks={unsolvedTasks.filter(
-                          (unsolvedTask) => unsolvedTask.taskDTO.id === task.id
-                        )}
-                        studentLateSolvedTasks={lateSolvedTasks.filter(
+                        studentsUnsolvedTasks={
+                          unsolvedTasks?.filter(
+                            (unsolvedTask) =>
+                              unsolvedTask.taskDTO.id === task.id
+                          ) || []
+                        }
+                        studentLateSolvedTasks={(lateSolvedTasks || []).filter(
                           (lateSolvedTask) =>
                             lateSolvedTask.taskDTO.id === task.id
                         )}
@@ -868,78 +927,80 @@ export default function Page({}) {
                       ></LessonCard>
                     ))}
                   </ScrollArea>
-                )}
+                }
               </div>
             </TabsContent>
             <TabsContent value="quizes">
               <div className="flex flex-row justify-between items-center mb-10">
                 <h1 className="text-2xl font-semibold text-nowrap">Quizzes</h1>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant={"default"}>Add new quiz</Button>
-                  </DialogTrigger>
-                  <DialogContent className="!max-w-[800px]">
-                    <DialogHeader>
-                      <DialogTitle>Add new quiz</DialogTitle>
-                      <DialogDescription></DialogDescription>
-                      {success ? (
-                        <Alert
-                          variant="default"
-                          className="mb-2 border-logo-green"
-                        >
-                          <AlertCircle className="h-4 w-4" color="#6DA544" />
-                          <AlertTitle className="text-logo-green">
-                            Success
-                          </AlertTitle>
-                          <AlertDescription className="text-logo-green">
-                            Quiz added successfully.
-                          </AlertDescription>
-                        </Alert>
-                      ) : null}
-                      {error ? (
-                        <Alert variant="destructive" className="mb-2">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertTitle className="text-logo-red">
-                            Error
-                          </AlertTitle>
-                          <AlertDescription>
-                            Couldn't add quiz. Please try again.
-                          </AlertDescription>
-                        </Alert>
-                      ) : null}
+                {currentUser?.role === "TEACHER" && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant={"default"}>Add new quiz</Button>
+                    </DialogTrigger>
+                    <DialogContent className="!max-w-[800px]">
+                      <DialogHeader>
+                        <DialogTitle>Add new quiz</DialogTitle>
+                        <DialogDescription></DialogDescription>
+                        {success ? (
+                          <Alert
+                            variant="default"
+                            className="mb-2 border-logo-green"
+                          >
+                            <AlertCircle className="h-4 w-4" color="#6DA544" />
+                            <AlertTitle className="text-logo-green">
+                              Success
+                            </AlertTitle>
+                            <AlertDescription className="text-logo-green">
+                              Quiz added successfully.
+                            </AlertDescription>
+                          </Alert>
+                        ) : null}
+                        {error ? (
+                          <Alert variant="destructive" className="mb-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle className="text-logo-red">
+                              Error
+                            </AlertTitle>
+                            <AlertDescription>
+                              Couldn't add quiz. Please try again.
+                            </AlertDescription>
+                          </Alert>
+                        ) : null}
 
-                      <Form {...quizForm}>
-                        <form
-                          onSubmit={quizForm.handleSubmit(onSubmitQuiz)}
-                          className="space-y-8"
-                        >
-                          <FormField
-                            control={quizForm.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Quiz name</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Quiz name"
-                                    onChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <Button className="w-[120px]" type="submit">
-                            Add quiz
-                          </Button>
-                        </form>
-                      </Form>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
+                        <Form {...quizForm}>
+                          <form
+                            onSubmit={quizForm.handleSubmit(onSubmitQuiz)}
+                            className="space-y-8"
+                          >
+                            <FormField
+                              control={quizForm.control}
+                              name="name"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Quiz name</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Quiz name"
+                                      onChange={field.onChange}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <Button className="w-[120px]" type="submit">
+                              Add quiz
+                            </Button>
+                          </form>
+                        </Form>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
               <div className="w-full mt-10">
-                {unsolvedTasks && lateSolvedTasks && (
+                {quizzes && (
                   <ScrollArea className="h-[640px] w-full pr-4">
                     {quizzes?.map((quiz, index) => (
                       <QuizCard
@@ -984,6 +1045,6 @@ export default function Page({}) {
           </div>
         </div>
       </div>
-    )
-  );
+    );
+  }
 }

@@ -828,3 +828,239 @@ export async function GetByQuizId(token: string, id: number) {
     throw error;
   }
 }
+
+export async function CreateManyExercises(
+  token: string,
+  createManyExercise: any
+) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/exercises/many`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(createManyExercise),
+    });
+    if (!response.ok) {
+      throw new Error("Could not add many exercises");
+    }
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}
+
+export async function CreateExercise(token: string, exerciseData: any) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/exercises`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(exerciseData),
+    });
+    if (!response.ok) {
+      throw new Error("Could not add exercise");
+    }
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}
+
+export async function UpdateExercise(
+  token: string,
+  id: number,
+  exerciseData: any
+) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/exercises/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(exerciseData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not update exercise");
+    }
+  } catch (error) {
+    console.error("Exercise update failed:", error);
+    throw error;
+  }
+}
+
+export async function GetExerciseById(token: string, id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/exercises/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Could not fetch exercise by id");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}
+
+export async function GetMyUrgentTasks(token: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/tasks/myUrgentTasks`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Could not fetch urgent tasks");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}
+
+export async function MyCourses(token: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/courses/myCourses`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Could not fetch courses");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}
+
+export async function UploadUserTask(
+  token: string,
+  formData: FormData,
+  id: number
+) {
+  console.log(formData);
+  try {
+    const response = await fetch(`${API_BASE_URL}/resources/upload/${id}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("Could not upload file");
+    }
+    return response;
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}
+
+export async function MyFromTask(token: string, id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/resources/myFromTask/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Could not fetch my from task");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}
+
+export async function RemoveTaskResource(token: string, downloadURL: string) {
+  try {
+    downloadURL = downloadURL.replace("/api/v1/resources/download/", "");
+    const response = await fetch(`${API_BASE_URL}/resources/${downloadURL}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not remove resource");
+    }
+  } catch (error) {
+    console.error("Resource remove failed:", error);
+    throw error;
+  }
+}
+
+export async function MyInvitations(token: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/invitations/myInvitations`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Could not fetch invitation requests");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}
+
+export async function RemoveExercise(token: string, id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/exercises/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not remove exercises");
+    }
+  } catch (error) {
+    console.error("Exercises remove failed:", error);
+    throw error;
+  }
+}
+
+export async function CourseChart(token: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/courses/courseChart`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Could not fetch data");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}

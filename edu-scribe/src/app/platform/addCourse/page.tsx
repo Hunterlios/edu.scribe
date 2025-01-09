@@ -36,6 +36,7 @@ import {
 import { format, setHours, setMinutes } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { useCurrentUserContext } from "@/app/currentUserProvider";
 
 const formSchema = z.object({
   name: z
@@ -70,6 +71,7 @@ export default function AddCourse() {
   const [success, setSuccess] = useState(false);
   const [selected, setSelected] = useState<Date>(new Date());
   const [timeValue, setTimeValue] = useState<string>("00:00");
+  const currentUser = useCurrentUserContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -139,6 +141,11 @@ export default function AddCourse() {
       console.error("Add course failed:", error);
     }
   };
+
+  if (currentUser?.role !== "TEACHER") {
+    window.location.href = "/platform";
+    return;
+  }
 
   return (
     <div className="w-2/6 h-full px-12 py-12">

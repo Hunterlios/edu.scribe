@@ -35,7 +35,6 @@ import { Separator } from "@/components/ui/separator";
 import Logo from "./Logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentUserContext } from "../currentUserProvider";
-import { constructNow } from "date-fns";
 
 interface NavItem {
   title: string;
@@ -92,9 +91,15 @@ export default function PlatformSidebar({
       },
       { title: "All courses", href: "/platform/coursesList", icon: List },
     ];
-  } else if (currentUser?.role === "STUDENT") {
+  } else if (currentUser?.role === "USER") {
     navItems = [
       { title: "Home", href: "/platform", icon: Home },
+      { title: "My courses", href: "/platform/myCourses", icon: LayoutGrid },
+      {
+        title: "Courses invitations",
+        href: "/platform/coursesInvitations",
+        icon: UserCheck,
+      },
       { title: "Courses", href: "/platform/coursesList", icon: List },
     ];
   }
@@ -198,7 +203,7 @@ export default function PlatformSidebar({
           </SidebarContent>
         )}
 
-        {currentUser?.role === "STUDENT" && (
+        {currentUser?.role === "USER" && (
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupContent>

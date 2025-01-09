@@ -92,6 +92,8 @@ export default function LessonCard({
   const isDeadline =
     new Date(task.deadline).toISOString() < new Date().toISOString();
   const [allTaskData, setAllTaskData] = useState<AllFromTask[] | null>(null);
+  const [myFromTask, setMyFromTask] = useState<SolvedTask[] | null>(null);
+  const [taskUploadClicked, setTaskUploadClicked] = useState(false);
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
   const [selected, setSelected] = useState<Date>(new Date(task.deadline));
@@ -118,6 +120,27 @@ export default function LessonCard({
 
       if (!response.ok) {
         console.error("Couldn't fetch all from task.");
+      }
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    }
+  };
+
+  const fetchMyFromTask = async () => {
+    try {
+      const response = await fetch("/api/resources/myFromTask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: task.id }),
+      });
+
+      if (!response.ok) {
+        console.error("Couldn't fetch my from task.");
       }
       const data = await response.json();
 
@@ -188,66 +211,54 @@ export default function LessonCard({
     }
   };
 
-  useEffect(() => {
-    fetchAllFromTaskData().then((data: SolvedTask[]) => {
-      const lateSolvedTasks = getAllFromTasks(studentLateSolvedTasks);
-      const newData: AllFromTask[] = data
-        .map((solvedTask: SolvedTask) => {
-          const participant = participants.find(
-            (participant: Participant) => participant.id === solvedTask.authorId
-          );
+  const handleDownload = async (downloadLink: string, fileName: string) => {
+    try {
+      const response = await fetch("/api/resources/download", {
+        method: "POST",
+        body: JSON.stringify({ downloadLink, fileName }),
+      });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      return response;
+    } catch (error) {
+      console.error("Decline failed:", error);
+    }
+  };
 
-          if (!participant) {
-            return undefined;
-          }
+  const handleSubmitTask = async (e: any) => {
+    e.preventDefault();
+    setTaskUploadClicked(true);
+    const formData = new FormData(e.currentTarget);
+    if (task.id) {
+      formData.append("id", task.id.toString());
+    }
+    const file = formData.get("file") as File | null;
+    if (!file || file.name === "") {
+      return;
+    }
 
-          if (
-            participant &&
-            !lateSolvedTasks.some((task) => task.id === participant.id)
-          ) {
-            participant.state = "2";
-            return {
-              id: participant?.id,
-              deadline: new Date(task.deadline)
-                .toLocaleDateString("en-GB")
-                .replace(/\//g, "."),
-              firstName: participant?.firstName,
-              lastName: participant?.lastName,
-              state: participant?.state,
-              downloadURL: solvedTask.downloadURL,
-              fileName: solvedTask.fileName,
-              date: new Date(solvedTask.uploadDate)
-                .toLocaleDateString("en-GB")
-                .replace(/\//g, "."),
-            };
-          } else if (
-            participant &&
-            lateSolvedTasks.some((task) => task.id === participant.id)
-          ) {
-            participant.state = "1";
-            return {
-              id: participant?.id,
-              deadline: new Date(task.deadline)
-                .toLocaleDateString("en-GB")
-                .replace(/\//g, "."),
-              firstName: participant?.firstName,
-              lastName: participant?.lastName,
-              state: participant?.state,
-              downloadURL: solvedTask.downloadURL,
-              fileName: solvedTask.fileName,
-              date: new Date(solvedTask.uploadDate)
-                .toLocaleDateString("en-GB")
-                .replace(/\//g, "."),
-            };
-          }
-        })
-        .filter((task) => task !== undefined);
-      setAllTaskData([...getAllFromTasks(studentsUnsolvedTasks), ...newData]);
-    });
-  }, []);
+    try {
+      const response = await fetch("/api/resources/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-  const handleSubmitTask = () => {
-    console.log("Submit task");
+      if (response.ok) {
+        window.location.reload();
+        return;
+      }
+
+      return response;
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    }
   };
 
   const handleDeleteTask = async () => {
@@ -268,7 +279,99 @@ export default function LessonCard({
     }
   };
 
-  if (!allTaskData) {
+  const handleRemoveResource = async (downloadURL: string) => {
+    try {
+      const response = await fetch(`/api/resources/removeResourceFromTask`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ downloadURL }),
+      });
+      if (response.ok) {
+        window.location.reload();
+      }
+      return response.json();
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (userRole === "TEACHER") {
+      fetchAllFromTaskData().then((data: SolvedTask[]) => {
+        const lateSolvedTasks = getAllFromTasks(studentLateSolvedTasks);
+        const newData: AllFromTask[] = data
+          .map((solvedTask: SolvedTask) => {
+            const participant = participants.find(
+              (participant: Participant) =>
+                participant.id === solvedTask.authorId
+            );
+
+            if (!participant) {
+              return undefined;
+            }
+
+            if (
+              participant &&
+              !lateSolvedTasks.some((task) => task.id === participant.id)
+            ) {
+              participant.state = "2";
+              return {
+                id: participant?.id,
+                deadline: new Date(task.deadline)
+                  .toLocaleDateString("en-GB")
+                  .replace(/\//g, "."),
+                firstName: participant?.firstName,
+                lastName: participant?.lastName,
+                state: participant?.state,
+                downloadURL: solvedTask.downloadURL,
+                fileName: solvedTask.fileName,
+                date: new Date(solvedTask.uploadDate)
+                  .toLocaleDateString("en-GB")
+                  .replace(/\//g, "."),
+              };
+            } else if (
+              participant &&
+              lateSolvedTasks.some((task) => task.id === participant.id)
+            ) {
+              participant.state = "1";
+              return {
+                id: participant?.id,
+                deadline: new Date(task.deadline)
+                  .toLocaleDateString("en-GB")
+                  .replace(/\//g, "."),
+                firstName: participant?.firstName,
+                lastName: participant?.lastName,
+                state: participant?.state,
+                downloadURL: solvedTask.downloadURL,
+                fileName: solvedTask.fileName,
+                date: new Date(solvedTask.uploadDate)
+                  .toLocaleDateString("en-GB")
+                  .replace(/\//g, "."),
+              };
+            }
+          })
+          .filter((task) => task !== undefined);
+        setAllTaskData([...getAllFromTasks(studentsUnsolvedTasks), ...newData]);
+      });
+    }
+    if (userRole === "USER") {
+      fetchMyFromTask().then((data) => {
+        setMyFromTask(data);
+      });
+    }
+  }, []);
+
+  if (!allTaskData && userRole === "TEACHER") {
+    return (
+      <div className="flex flex-col space-y-3 w-full mb-2">
+        <Skeleton className="h-[135px] w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  if (!myFromTask && userRole === "USER") {
     return (
       <div className="flex flex-col space-y-3 w-full mb-2">
         <Skeleton className="h-[135px] w-full rounded-xl" />
@@ -302,11 +405,49 @@ export default function LessonCard({
                   )}`}</span>
                 </DialogDescription>
               </DialogHeader>
-              {userRole === "STUDENT" && (
+              {myFromTask && myFromTask.length > 0 && userRole === "USER" ? (
                 <DialogFooter>
-                  <Button variant={"default"} onClick={handleSubmitTask}>
-                    Submit task
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    {myFromTask.map((task: SolvedTask) => (
+                      <div
+                        key={task.downloadURL}
+                        className="flex flex-row gap-1 items-center"
+                      >
+                        <Button
+                          variant="link"
+                          onClick={() =>
+                            handleDownload(task.downloadURL, task.fileName)
+                          }
+                        >
+                          {task.fileName}
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size={"sm"}
+                          onClick={() => handleRemoveResource(task.downloadURL)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </DialogFooter>
+              ) : (
+                <DialogFooter>
+                  <form
+                    onSubmit={handleSubmitTask}
+                    className="flex flex-row justify-start gap-2 items-center"
+                  >
+                    <Input type="file" name="file" className="w-[200px]" />
+                    <Button
+                      variant={"default"}
+                      size={"sm"}
+                      type="submit"
+                      disabled={taskUploadClicked}
+                    >
+                      Submit
+                    </Button>
+                  </form>
                 </DialogFooter>
               )}
             </DialogContent>
