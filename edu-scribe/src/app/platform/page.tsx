@@ -41,9 +41,19 @@ interface CourseData {
   [key: string]: number;
 }
 
+interface DateCharteData {
+  [key: string]: number;
+}
+
 interface ChartData {
   course: string;
   students: number;
+  fill: string;
+}
+
+interface DateChartData {
+  date: string;
+  users: number;
   fill: string;
 }
 
@@ -65,6 +75,13 @@ const chartConfig = {
   },
   deutsh: {
     label: "Deutsch",
+    color: "hsl(var(--chart-4))",
+  },
+} satisfies ChartConfig;
+
+const dateChartConfig = {
+  users: {
+    label: "Registered Users",
     color: "hsl(var(--chart-4))",
   },
 } satisfies ChartConfig;
@@ -105,24 +122,39 @@ interface UrgentTask {
   contents: string;
 }
 
+const formatChartData = (data: CourseData): ChartData[] => {
+  return Object.entries(data)
+    .map(([course, students]) => {
+      const [language] = course.split(" ");
+      return {
+        course,
+        students,
+        fill: colorMap[language] || "var(--color-primary)",
+      };
+    })
+    .sort((a, b) => a.course.localeCompare(b.course));
+};
+
+const formatDateChartData = (data: DateCharteData): DateChartData[] => {
+  return Object.entries(data)
+    .map(([date, users]) => {
+      return {
+        date,
+        users,
+        fill: "hsl(var(--chart-1))",
+      };
+    })
+    .sort((a, b) => a.date.localeCompare(b.date));
+};
+
 export default function Platform() {
   const [requests, setRequests] = useState([]);
   const currentUser = useCurrentUserContext();
   const [isOpen, setIsOpen] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  function formatChartData(data: CourseData): ChartData[] {
-    return Object.entries(data)
-      .map(([course, students]) => {
-        const [language] = course.split(" ");
-        return {
-          course,
-          students,
-          fill: colorMap[language] || "var(--color-primary)",
-        };
-      })
-      .sort((a, b) => a.course.localeCompare(b.course));
-  }
+  const [dateChartData, setDateChartData] = useState<DateChartData[]>([]);
+  const total = dateChartData.reduce((acc, { users }) => acc + users, 0);
 
   const fetchMyCoursesTeacher = async () => {
     try {
@@ -176,6 +208,25 @@ export default function Platform() {
       }
       const data = await response.json();
       setChartData(formatChartData(data));
+    } catch (error) {
+      console.error("Data fetch failed:", error);
+    }
+  };
+
+  const getDateChartData = async () => {
+    try {
+      const response = await fetch("/api/auth/dateChart", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Couldn't fetch data.");
+      }
+      const data = await response.json();
+      setDateChartData(formatDateChartData(data));
     } catch (error) {
       console.error("Data fetch failed:", error);
     }
@@ -276,6 +327,7 @@ export default function Platform() {
     if (currentUser.role === "ADMIN") {
       getNotificationsAdmin();
       getChartData();
+      getDateChartData();
     } else if (currentUser.role === "TEACHER") {
       getNotificationsTeacher();
       fetchMyCoursesTeacher().then((data) => {
@@ -324,11 +376,11 @@ export default function Platform() {
 
         {currentUser.role === "ADMIN" && (
           <div className="w-full h-full px-10 py-10">
-            <h1 className="text-5xl font-extrabold row-span-1">
+            <h1 className="text-5xl font-extrabold">
               Hi {currentUser?.firstName}! 👋
             </h1>
-            <div className="flex flex-row gap-4 justify-between mt-10 row-span-5">
-              <Card>
+            <div className="flex flex-row gap-4 justify-between mt-10">
+              <Card className="mb-4">
                 <CardHeader>
                   <CardTitle>Language Course Enrollment</CardTitle>
                   <CardDescription>
@@ -338,7 +390,7 @@ export default function Platform() {
                 <CardContent>
                   <ChartContainer
                     config={chartConfig}
-                    className="h-[500px] w-[1000px]"
+                    className="h-[350px] w-[1000px]"
                   >
                     <BarChart
                       accessibilityLayer
@@ -418,7 +470,7 @@ export default function Platform() {
                   <div className="flex flex-col gap-4">
                     {[...(requests as User[])]
                       .reverse()
-                      .slice(0, 2)
+                      .slice(0, 3)
                       .map((request) => (
                         <Link href="/platform/addUser" key={request.id}>
                           <Card>
@@ -452,13 +504,88 @@ export default function Platform() {
                 )}
               </div>
             </div>
-            <div className="absolute right-0 bottom-0">
-              <Image
-                src="/yellow-kid-learning-img.svg"
-                width={420}
-                height={420}
-                alt="Picture of the author"
-              />
+            <div>
+              <Card className="w-full mx-auto flex flex-row justify-between items-center">
+                <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0">
+                  <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
+                    <CardTitle>New User Registrations</CardTitle>
+                    <CardDescription>
+                      Showing registered users for the last 2 months
+                    </CardDescription>
+                  </div>
+                  <div className="flex">
+                    <div className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left sm:border-t-0 sm:px-8 sm:py-6">
+                      <span className="text-xs text-muted-foreground">
+                        {dateChartConfig.users.label}
+                      </span>
+                      <span className="text-lg font-bold leading-none sm:text-3xl">
+                        {total.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-6 overflow-x-auto">
+                  <ChartContainer
+                    config={chartConfig}
+                    className="h-[100px] w-full min-w-[1200px]"
+                  >
+                    <BarChart
+                      accessibilityLayer
+                      data={dateChartData}
+                      margin={{
+                        left: 12,
+                        right: 12,
+                        top: 12,
+                        bottom: 12,
+                      }}
+                    >
+                      <CartesianGrid vertical={false} />
+                      <XAxis
+                        dataKey="date"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        minTickGap={32}
+                        tickFormatter={(value) => {
+                          const date = new Date(value);
+                          return date.toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          });
+                        }}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        allowDecimals={false}
+                        tickFormatter={(value) =>
+                          value > 0 ? value.toLocaleString() : ""
+                        }
+                      />
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent
+                            className="w-[150px]"
+                            nameKey="users"
+                            labelFormatter={(value) => {
+                              return new Date(value).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              );
+                            }}
+                          />
+                        }
+                      />
+                      <Bar dataKey="users" fill={`var(--color-users)`} />
+                    </BarChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
             </div>
           </div>
         )}
@@ -557,7 +684,7 @@ export default function Platform() {
 
         {currentUser.role === "USER" && (
           <div className="w-full h-full px-10 py-5">
-            <div className="flex flex-row w-full justify-between items-center pr-0">
+            <div className="flex flex-row w-full justify-between items-center">
               <h1 className="text-5xl font-extrabold">
                 Hi {currentUser?.firstName}! 👋
               </h1>

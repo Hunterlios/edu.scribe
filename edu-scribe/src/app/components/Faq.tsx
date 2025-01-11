@@ -21,45 +21,32 @@ export default function Faq() {
             <AccordionItem value="item-1">
               <AccordionTrigger>How to get access?</AccordionTrigger>
               <AccordionContent>
-                Lorem Ipsum is simply dummy text of the printing and
-                typesetting industry. Lorem Ipsum has been the industry's
-                standard dummy text ever since the 1500s, when an unknown
-                printer took a galley of type and scrambled it to make a type
-                specimen book. It has survived not only five centuries, but
-                also the leap into electronic typesetting, remaining
-                essentially unchanged. It was popularised in the 1960s with
-                the release of Letraset sheets containing Lorem Ipsum
-                passages, and more recently with desktop publishing software
-                like Aldus PageMaker including versions of Lorem Ipsum.
+                Click the "Try Out" or "Get access" button to register. Once the
+                school administrator approves your registration, you’ll receive
+                an email with your password to access the platform.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
               <AccordionTrigger>What courses do you offer?</AccordionTrigger>
               <AccordionContent>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Illo
-                facilis delectus cupiditate excepturi, assumenda unde, at eum
-                esse qui accusantium necessitatibus, itaque quod quo
-                aspernatur error. Atque dicta excepturi eos!
+                We offer a variety of language courses, including English,
+                German, Spanish, Italian, French, and many others.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
               <AccordionTrigger>How do the courses work?</AccordionTrigger>
               <AccordionContent>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Quaerat corrupti possimus quo animi sapiente ut, iure
-                molestiae quos a ad, reprehenderit aperiam tempora. At
-                expedita est unde placeat voluptas odio.
+                Our courses combine engaging lessons, interactive activities,
+                and teacher support to help you master the language. You'll be
+                guided through the materials step by step.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-4">
               <AccordionTrigger>Can I learn at my own pace?</AccordionTrigger>
               <AccordionContent>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam
-                excepturi obcaecati possimus architecto, dolor fuga unde
-                impedit provident, esse culpa minus quas minima vero, laborum
-                commodi quasi necessitatibus nisi non voluptas placeat
-                repellat magni. Perferendis ipsam ad aut vitae, consequatur
-                repudiandae veritatis eveniet.
+                While there are deadlines for assignments, you’ll have plenty of
+                time to complete them, and our teachers are flexible to
+                accommodate your needs.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-5">
@@ -67,67 +54,16 @@ export default function Faq() {
                 How do I access the course materials?
               </AccordionTrigger>
               <AccordionContent>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Distinctio ab ex ipsa dolor, veniam nihil sapiente illum
-                architecto deserunt molestias cumque quam ducimus, quae
-                nostrum excepturi reiciendis. Ea aspernatur accusantium cum a
-                eos quidem ipsam sequi dignissimos? Perferendis cupiditate
-                laudantium aliquid maxime veniam nisi suscipit quibusdam
-                repellendus itaque voluptatibus temporibus deleniti eos odio
-                iste, fugiat, officia tenetur rerum maiores. Quibusdam
-                doloribus quae libero, perspiciatis maxime laborum consequatur
-                obcaecati delectus id in sunt beatae rem natus nulla corrupti
-                sint odit? Nam dolore molestiae eaque adipisci ducimus
-                obcaecati quidem, dolorum rem, non aliquid et? Ipsam repellat
-                perspiciatis fugit, cupiditate quis modi commodi accusantium!
-                Repudiandae adipisci voluptatum consequuntur.
+                Once you're accepted into a course, you’ll find all the
+                materials in the course’s left panel on the platform.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-6">
               <AccordionTrigger>How do I earn points?</AccordionTrigger>
               <AccordionContent>
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Pariatur sequi amet accusamus in libero est consequuntur
-                voluptatum? Impedit molestiae expedita pariatur a similique
-                dolor repellat, delectus facilis dignissimos vitae deserunt
-                atque iure numquam corrupti ex quaerat officiis alias
-                exercitationem. Vel esse veritatis ducimus nobis quasi qui
-                ipsum magnam, maxime magni tenetur mollitia minus, quibusdam
-                iusto sit, voluptas numquam velit libero. Veniam voluptatem ad
-                ex consectetur sed sequi aliquid quaerat exercitationem
-                officia, fugit sint omnis quibusdam aspernatur qui modi. Error
-                vel ad animi odio debitis quod fugiat neque expedita omnis,
-                accusamus reiciendis a veniam dicta dignissimos ratione?
-                Facere blanditiis, voluptatem doloremque cum ea maxime nam
-                autem dolores incidunt, omnis, repellat quod suscipit delectus
-                perspiciatis sequi praesentium exercitationem voluptatibus
-                ducimus facilis dolorem eligendi dicta ad! Quasi voluptatum
-                eligendi fugit ducimus saepe quas tenetur minima sint
-                recusandae, ex ad voluptatibus temporibus optio, autem
-                expedita non suscipit quibusdam rerum. Officiis ab doloribus
-                laboriosam natus fugiat amet in animi fugit provident ad dolor
-                aliquam, odio sit, nihil nostrum ratione neque minus
-                repellendus quae. Consequatur doloribus neque exercitationem
-                nisi inventore quia placeat qui explicabo sunt blanditiis,
-                harum in eos pariatur corporis odio saepe, iure maiores
-                aliquid doloremque nobis amet quo quae obcaecati quam. Dolores
-                officia perspiciatis laboriosam molestias beatae, quia
-                aliquid, minus, non adipisci sapiente architecto!
-                Exercitationem odio reprehenderit perferendis doloremque
-                voluptas. Fuga debitis, hic voluptatum quibusdam magnam
-                cupiditate beatae cum soluta voluptas nemo voluptates
-                exercitationem. Modi non eum optio, hic reprehenderit ab
-                provident mollitia at ad quisquam nobis nostrum tenetur, odio
-                quia, libero nesciunt molestias. Debitis molestiae aliquam
-                ducimus amet. Explicabo iste saepe labore, non, debitis magnam
-                beatae nulla et voluptates minima quis autem cupiditate
-                placeat sunt. Temporibus quasi nobis totam, cupiditate ab
-                labore quos eaque aliquam enim praesentium. Aliquam asperiores
-                quis error eius ullam in odio suscipit? Fugiat autem facere
-                delectus maiores doloribus accusantium, et quidem totam
-                excepturi laudantium magni neque, velit impedit quae similique
-                illum assumenda. Dolore expedita accusamus obcaecati non
-                magni.
+                Our platform doesn’t have a point system. However, you can
+                complete quizzes and activities to test your knowledge and track
+                your progress.
               </AccordionContent>
             </AccordionItem>
           </Accordion>

@@ -1064,3 +1064,21 @@ export async function CourseChart(token: string) {
     throw error;
   }
 }
+
+export async function DateChart(token: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/dateChart/60`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Could not fetch data");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw error;
+  }
+}

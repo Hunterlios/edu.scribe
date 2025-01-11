@@ -980,7 +980,7 @@ export default function QuizPage() {
               </Button>
               <Button
                 variant="destructive"
-                className="w-[120px]"
+                className="w-[140px]"
                 onClick={handleRemoveExercise}
               >
                 Remove exercise
@@ -1079,7 +1079,8 @@ export default function QuizPage() {
               <h1 className="text-3xl font-semibold text-nowrap">
                 {exercises[activeExercise]?.content}
               </h1>
-              <div className="">
+              <Separator orientation="horizontal" className="w-2/3 mb-2" />
+              <div>
                 {(exercises[activeExercise]?.type === "SINGLECHOICE" && (
                   <div
                     className={
@@ -1178,6 +1179,14 @@ export default function QuizPage() {
               </div>
             </div>
           )}
+        </div>
+        <div className="absolute bottom-0 right-0">
+          <Image
+            src="/quiz-img.svg"
+            width={450}
+            height={450}
+            alt="Picture of the author"
+          />
         </div>
       </div>
     )
