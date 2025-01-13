@@ -12,6 +12,17 @@ import { useCurrentUserContext } from "@/app/currentUserProvider";
 import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -161,6 +172,7 @@ export default function Page({}) {
   const [success, setSuccess] = useState(false);
   const [selected, setSelected] = useState<Date>(addDays(new Date(), 1));
   const [timeValue, setTimeValue] = useState<string>("00:00");
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const taskForm = useForm<z.infer<typeof taskFormSchema>>({
     resolver: zodResolver(taskFormSchema),
@@ -348,6 +360,7 @@ export default function Page({}) {
   };
 
   const handleRemoveUser = async (participantId: number) => {
+    setButtonDisabled(true);
     const requestData = {
       courseId: courseId,
       id: participantId,
@@ -362,14 +375,17 @@ export default function Page({}) {
       });
       if (response.ok) {
         window.location.reload();
+        return;
       }
       return response.json();
     } catch (error) {
+      setButtonDisabled(false);
       console.error("Fetch failed:", error);
     }
   };
 
   const handleRemoveResource = async (downloadURL: string) => {
+    setButtonDisabled(true);
     try {
       const response = await fetch(
         `/api/courseResources/removeResourceFromCourse`,
@@ -383,9 +399,11 @@ export default function Page({}) {
       );
       if (response.ok) {
         window.location.reload();
+        return;
       }
       return response.json();
     } catch (error) {
+      setButtonDisabled(false);
       console.error("Fetch failed:", error);
     }
   };
@@ -413,12 +431,14 @@ export default function Page({}) {
 
   const handleAddCourseResource = async (e: any) => {
     e.preventDefault();
+    setButtonDisabled(true);
     const formData = new FormData(e.currentTarget);
     if (courseId) {
       formData.append("id", courseId);
     }
     const file = formData.get("file") as File | null;
     if (!file || file.name === "") {
+      setButtonDisabled(false);
       return;
     }
 
@@ -430,10 +450,12 @@ export default function Page({}) {
 
       if (response.ok) {
         window.location.reload();
+        return;
       }
 
       return response;
     } catch (error) {
+      setButtonDisabled(false);
       console.error("Fetch failed:", error);
     }
   };
@@ -487,6 +509,7 @@ export default function Page({}) {
   };
 
   const onSubmitTask = async (values: z.infer<typeof taskFormSchema>) => {
+    setButtonDisabled(true);
     const data = {
       courseId: course?.id,
       contents: values.contents,
@@ -502,6 +525,7 @@ export default function Page({}) {
       });
 
       if (!response.ok) {
+        setButtonDisabled(false);
         setError(true);
         setSuccess(false);
         return;
@@ -509,12 +533,14 @@ export default function Page({}) {
       setError(false);
       setSuccess(true);
       window.location.reload();
+      return;
     } catch (error) {
       console.error("Add task failed:", error);
     }
   };
 
   const onSubmitQuiz = async (values: z.infer<typeof quizFormSchema>) => {
+    setButtonDisabled(true);
     const data = {
       courseId: course?.id,
       name: values.name,
@@ -529,6 +555,7 @@ export default function Page({}) {
       });
 
       if (!response.ok) {
+        setButtonDisabled(false);
         setError(true);
         setSuccess(false);
         return;
@@ -536,6 +563,7 @@ export default function Page({}) {
       setError(false);
       setSuccess(true);
       window.location.reload();
+      return;
     } catch (error) {
       console.error("Add quiz failed:", error);
     }
@@ -646,9 +674,30 @@ export default function Page({}) {
           </div>
           <Separator className="my-5 w-[400px]" />
           {currentUser.role === "USER" && (
-            <Button variant={"default"} onClick={handleApplyForCourse}>
-              Apply for course
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant={"default"} onClick={handleApplyForCourse}>
+                  Apply for course
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    You have applied for the course! 🎉
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Check your courses invitations for more information. When
+                    the teacher accepts your application, you will be able to
+                    see the course.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction className="mt-3 w-[100px]">
+                    Close
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
           <div className="absolute bottom-0 right-0">
             <Image
@@ -667,7 +716,7 @@ export default function Page({}) {
     return (
       <div className="py-10 px-10 flex flex-row gap-10 h-full w-full">
         <div className="w-full h-full flex flex-col gap-3 mb-3 max-w-[300px] text-nowrap">
-          <h1 className="text-2xl font-semibold text-nowrap">
+          <h1 className="text-2xl font-semibold text-pretty">
             Welcome to {course?.name}
           </h1>
           <div className="mt-10 flex flex-row gap-2">
@@ -704,6 +753,7 @@ export default function Page({}) {
                           <Button
                             variant="destructive"
                             size={"sm"}
+                            disabled={buttonDisabled}
                             onClick={() => handleRemoveUser(participant.id)}
                           >
                             Remove
@@ -729,7 +779,12 @@ export default function Page({}) {
                         className="flex flex-row justify-start gap-2 items-center"
                       >
                         <Input type="file" name="file" />
-                        <Button variant={"default"} size={"sm"} type="submit">
+                        <Button
+                          variant={"default"}
+                          size={"sm"}
+                          type="submit"
+                          disabled={buttonDisabled}
+                        >
                           Upload
                         </Button>
                       </form>
@@ -758,6 +813,7 @@ export default function Page({}) {
                           <Button
                             variant="destructive"
                             size={"sm"}
+                            disabled={buttonDisabled}
                             onClick={() =>
                               handleRemoveResource(courseResource.downloadURL)
                             }
@@ -893,7 +949,11 @@ export default function Page({}) {
                                 </FormItem>
                               )}
                             />
-                            <Button className="w-[120px]" type="submit">
+                            <Button
+                              className="w-[120px]"
+                              type="submit"
+                              disabled={buttonDisabled}
+                            >
                               Add task
                             </Button>
                           </form>
@@ -905,7 +965,7 @@ export default function Page({}) {
               </div>
 
               <div className="w-full mt-10">
-                {
+                {lateSolvedTasks && unsolvedTasks && isTeacherCourse && (
                   <ScrollArea className="h-[640px] w-full pr-4">
                     {tasks?.map((task, index) => (
                       <LessonCard
@@ -927,7 +987,30 @@ export default function Page({}) {
                       ></LessonCard>
                     ))}
                   </ScrollArea>
-                }
+                )}
+                {isUserCourse && (
+                  <ScrollArea className="h-[640px] w-full pr-4">
+                    {tasks?.map((task, index) => (
+                      <LessonCard
+                        key={index}
+                        keyId={index + 1}
+                        task={task}
+                        userRole={currentUser?.role || ""}
+                        studentsUnsolvedTasks={
+                          unsolvedTasks?.filter(
+                            (unsolvedTask) =>
+                              unsolvedTask.taskDTO.id === task.id
+                          ) || []
+                        }
+                        studentLateSolvedTasks={(lateSolvedTasks || []).filter(
+                          (lateSolvedTask) =>
+                            lateSolvedTask.taskDTO.id === task.id
+                        )}
+                        participants={participants}
+                      ></LessonCard>
+                    ))}
+                  </ScrollArea>
+                )}
               </div>
             </TabsContent>
             <TabsContent value="quizes">
@@ -989,7 +1072,11 @@ export default function Page({}) {
                                 </FormItem>
                               )}
                             />
-                            <Button className="w-[120px]" type="submit">
+                            <Button
+                              className="w-[120px]"
+                              type="submit"
+                              disabled={buttonDisabled}
+                            >
                               Add quiz
                             </Button>
                           </form>

@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -54,7 +53,7 @@ export default function QuizCard({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const data = {
-      id: courseId,
+      id: quiz.id,
       name: values.name,
     };
 
@@ -91,6 +90,7 @@ export default function QuizCard({
       });
       if (response.ok) {
         window.location.reload();
+        return;
       }
       return response.json();
     } catch (error) {

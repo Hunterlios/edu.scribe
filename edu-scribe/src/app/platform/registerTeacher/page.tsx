@@ -38,6 +38,7 @@ const formSchema = z.object({
 export default function RegisterTeacher() {
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,6 +50,7 @@ export default function RegisterTeacher() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setButtonDisabled(true);
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -59,6 +61,7 @@ export default function RegisterTeacher() {
       });
 
       if (!response.ok) {
+        setButtonDisabled(false);
         setError(true);
         setSuccess(false);
         return;
@@ -66,6 +69,7 @@ export default function RegisterTeacher() {
       setError(false);
       setSuccess(true);
       form.reset();
+      return;
     } catch (error) {
       console.error("Registration failed:", error);
     }

@@ -99,6 +99,7 @@ export default function CourseUpdateCard({ course }: { course: Course }) {
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
   const [selected, setSelected] = useState<Date>(new Date(newDate));
+  const [buttonDisabled, setButtonDisabled] = useState(false);
   const [timeValue, setTimeValue] = useState<string>(
     new Date(newDate).toLocaleTimeString("pl-PL")
   );
@@ -145,6 +146,7 @@ export default function CourseUpdateCard({ course }: { course: Course }) {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setButtonDisabled(true);
     const data = {
       id: id,
       name: values.name,
@@ -163,6 +165,7 @@ export default function CourseUpdateCard({ course }: { course: Course }) {
       });
 
       if (!response.ok) {
+        setButtonDisabled(false);
         setError(true);
         setSuccess(false);
         return;
@@ -170,6 +173,7 @@ export default function CourseUpdateCard({ course }: { course: Course }) {
       setError(false);
       setSuccess(true);
       window.location.reload();
+      return;
     } catch (error) {
       console.error("Update user failed:", error);
     }
@@ -327,7 +331,11 @@ export default function CourseUpdateCard({ course }: { course: Course }) {
                     </FormItem>
                   )}
                 />
-                <Button className="w-[120px]" type="submit">
+                <Button
+                  className="w-[120px]"
+                  type="submit"
+                  disabled={buttonDisabled}
+                >
                   Update course
                 </Button>
               </form>

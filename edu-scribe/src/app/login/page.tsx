@@ -34,6 +34,7 @@ const formSchema = z.object({
 
 export default function Login() {
   const [error, setError] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,6 +46,7 @@ export default function Login() {
   const router = useRouter();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setButtonDisabled(true);
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -55,11 +57,13 @@ export default function Login() {
       });
 
       if (!response.ok) {
+        setButtonDisabled(false);
         setError(true);
         return;
       }
 
       router.push("/platform");
+      return;
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -127,12 +131,17 @@ export default function Login() {
                   )}
                 />
                 <div className="flex flex-row justify-between">
-                  <Button className="w-[120px] h-[40px]" type="submit">
+                  <Button
+                    className="w-[120px] h-[40px]"
+                    type="submit"
+                    disabled={buttonDisabled}
+                  >
                     Login
                   </Button>
                   <Button
                     className="w-[120px] h-[40px]"
                     variant="outline"
+                    disabled={buttonDisabled}
                     type="button"
                     asChild
                   >

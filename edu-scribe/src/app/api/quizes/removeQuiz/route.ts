@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { RemoveTask } from "../../../../lib/api";
+import { RemoveQuiz } from "../../../../lib/api";
 import { cookies } from "next/headers";
 
 export async function DELETE(request: Request) {
@@ -9,7 +9,7 @@ export async function DELETE(request: Request) {
 
   if (token) {
     try {
-      await RemoveTask(token.value, id);
+      await RemoveQuiz(token.value, id);
       return NextResponse.json(
         { message: "Quiz remove successful" },
         { status: 200 }

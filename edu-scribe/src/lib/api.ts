@@ -435,7 +435,6 @@ export async function Download(token: string, downloadLink: string) {
 }
 
 export async function Upload(token: string, formData: FormData, id: number) {
-  console.log(formData);
   try {
     const response = await fetch(
       `${API_BASE_URL}/courses/resources/upload/${id}`,
@@ -953,7 +952,6 @@ export async function UploadUserTask(
   formData: FormData,
   id: number
 ) {
-  console.log(formData);
   try {
     const response = await fetch(`${API_BASE_URL}/resources/upload/${id}`, {
       method: "POST",

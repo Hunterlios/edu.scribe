@@ -10,6 +10,7 @@ import { useCurrentUserContext } from "@/app/currentUserProvider";
 export default function AddUser() {
   const [users, setUsers] = useState<User[]>([]);
   const currentUser = useCurrentUserContext();
+
   const fetchData = async () => {
     try {
       const response = await fetch("/api/auth/requests", {

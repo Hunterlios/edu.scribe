@@ -79,6 +79,7 @@ export default function Profile() {
   const currentUser = useCurrentUserContext();
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -91,6 +92,7 @@ export default function Profile() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setButtonDisabled(true);
     const data = {
       id: currentUser?.id,
       firstName: values.firstName,
@@ -108,6 +110,7 @@ export default function Profile() {
       });
 
       if (!response.ok) {
+        setButtonDisabled(false);
         setError(true);
         setSuccess(false);
         return;
@@ -115,6 +118,7 @@ export default function Profile() {
       setError(false);
       setSuccess(true);
       window.location.reload();
+      return;
     } catch (error) {
       console.error("Update user failed:", error);
     }
@@ -292,7 +296,11 @@ export default function Profile() {
                   </FormItem>
                 )}
               />
-              <Button className="w-[120px]" type="submit">
+              <Button
+                className="w-[120px]"
+                type="submit"
+                disabled={buttonDisabled}
+              >
                 Update profile
               </Button>
             </form>

@@ -2,6 +2,8 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { set } from "date-fns";
 
 export interface Course {
   id: number;
@@ -109,15 +111,22 @@ export const columnsAdmin: ColumnDef<Course>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {
-      const handleRemoveCourse = () => {
+      const [buttonDisabled, setButtonDisabled] = useState(false);
+      const handleRemoveCourse = async () => {
         const id = row.original.id;
-        removeCourse(id);
+        setButtonDisabled(true);
+        try {
+          await removeCourse(id);
+        } catch (error) {
+          setButtonDisabled(false);
+        }
       };
       return (
         <div className="flex items-center justify-center">
           <Button
             size="sm"
             variant="destructive"
+            disabled={buttonDisabled}
             className="w-[80px]"
             onClick={handleRemoveCourse}
           >

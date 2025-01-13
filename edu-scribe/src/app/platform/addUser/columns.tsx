@@ -19,7 +19,8 @@ export type User = {
   role: string;
 };
 
-const declineRequest = async (id: number) => {
+const declineRequest = async (id: number, e: any) => {
+  e.preventDefault();
   try {
     const response = await fetch("/api/auth/decline", {
       method: "POST",
@@ -164,20 +165,37 @@ export const columns: ColumnDef<User>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {
-      const handleAcceptClick = () => {
+      const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
+      const handleAcceptClick = async () => {
+        setIsButtonDisabled(true);
         const selectedRole = row.original.role;
         const id = row.original.id;
-        acceptRequest(selectedRole, id);
+
+        try {
+          await acceptRequest(selectedRole, id);
+          setTimeout(() => setIsButtonDisabled(false), 3000);
+        } catch (error) {
+          setIsButtonDisabled(false);
+        }
       };
-      const handleDeclineClick = () => {
+
+      const handleDeclineClick = async (e: any) => {
+        setIsButtonDisabled(true);
         const id = row.original.id;
-        declineRequest(id);
+
+        try {
+          await declineRequest(id, e);
+        } catch (error) {
+          setIsButtonDisabled(false);
+        }
       };
       return (
         <div className="flex gap-4">
           <Button
             size="sm"
             variant="outline"
+            disabled={isButtonDisabled}
             className="w-[80px] bg-transparent"
             onClick={handleAcceptClick}
           >
@@ -185,6 +203,7 @@ export const columns: ColumnDef<User>[] = [
           </Button>
           <Button
             size="sm"
+            disabled={isButtonDisabled}
             variant="destructive"
             className="w-[80px]"
             onClick={handleDeclineClick}

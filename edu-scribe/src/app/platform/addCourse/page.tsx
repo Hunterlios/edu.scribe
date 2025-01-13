@@ -71,6 +71,7 @@ export default function AddCourse() {
   const [success, setSuccess] = useState(false);
   const [selected, setSelected] = useState<Date>(new Date());
   const [timeValue, setTimeValue] = useState<string>("00:00");
+  const [buttonDisabled, setButtonDisabled] = useState(false);
   const currentUser = useCurrentUserContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -116,6 +117,7 @@ export default function AddCourse() {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setButtonDisabled(true);
     const data = {
       ...values,
       date: format(selected, "EEEE HH:mm"),
@@ -130,6 +132,7 @@ export default function AddCourse() {
       });
 
       if (!response.ok) {
+        setButtonDisabled(false);
         setError(true);
         setSuccess(false);
         return;
@@ -137,6 +140,7 @@ export default function AddCourse() {
       setError(false);
       setSuccess(true);
       window.location.reload();
+      return;
     } catch (error) {
       console.error("Add course failed:", error);
     }
@@ -283,7 +287,7 @@ export default function AddCourse() {
             )}
           />
           <Button className="w-[120px]" type="submit">
-            Add task
+            Add course
           </Button>
         </form>
       </Form>

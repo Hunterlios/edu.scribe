@@ -4,6 +4,7 @@ import { ArrowUpDown } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Invitation } from "./page";
+import { useState } from "react";
 
 const declineRequest = async (id: number) => {
   try {
@@ -144,19 +145,32 @@ export const columns: ColumnDef<Invitation>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {
-      const handleAcceptClick = () => {
+      const [buttonDisabled, setButtonDisabled] = useState(false);
+      const handleAcceptClick = async () => {
         const id = row.original.id;
-        acceptRequest(id);
+        setButtonDisabled(true);
+        try {
+          await acceptRequest(id);
+          setTimeout(() => setButtonDisabled(false), 3000);
+        } catch (error) {
+          setButtonDisabled(false);
+        }
       };
-      const handleDeclineClick = () => {
+      const handleDeclineClick = async () => {
         const id = row.original.id;
-        declineRequest(id);
+        setButtonDisabled(true);
+        try {
+          await declineRequest(id);
+        } catch (error) {
+          setButtonDisabled(false);
+        }
       };
       return (
         <div className="flex gap-4">
           <Button
             size="sm"
             variant="outline"
+            disabled={buttonDisabled}
             className="w-[80px] bg-transparent"
             onClick={handleAcceptClick}
           >
@@ -165,6 +179,7 @@ export const columns: ColumnDef<Invitation>[] = [
           <Button
             size="sm"
             variant="destructive"
+            disabled={buttonDisabled}
             className="w-[80px]"
             onClick={handleDeclineClick}
           >

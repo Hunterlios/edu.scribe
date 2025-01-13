@@ -27,6 +27,7 @@ export interface Invitation {
 export default function CourseInvitations() {
   const [requests, setRequests] = useState<Invitation[]>([]);
   const currentUser = useCurrentUserContext();
+
   const getInvitationsTeacher = async () => {
     try {
       const response = await fetch("/api/invitations/myInvitationsTeacher", {

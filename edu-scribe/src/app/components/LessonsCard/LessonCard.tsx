@@ -93,7 +93,7 @@ export default function LessonCard({
     new Date(task.deadline).toISOString() < new Date().toISOString();
   const [allTaskData, setAllTaskData] = useState<AllFromTask[] | null>(null);
   const [myFromTask, setMyFromTask] = useState<SolvedTask[] | null>(null);
-  const [taskUploadClicked, setTaskUploadClicked] = useState(false);
+  const [buttonDisable, setButtonDisable] = useState(false);
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
   const [selected, setSelected] = useState<Date>(new Date(task.deadline));
@@ -183,6 +183,8 @@ export default function LessonCard({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setButtonDisable(true);
+
     const data = {
       id: task.id,
       content: values.content,
@@ -199,6 +201,7 @@ export default function LessonCard({
       });
 
       if (!response.ok) {
+        setButtonDisable(false);
         setError(true);
         setSuccess(false);
         return;
@@ -207,7 +210,7 @@ export default function LessonCard({
       setSuccess(true);
       window.location.reload();
     } catch (error) {
-      console.error("Update user failed:", error);
+      console.error("Update task failed:", error);
     }
   };
 
@@ -234,13 +237,15 @@ export default function LessonCard({
 
   const handleSubmitTask = async (e: any) => {
     e.preventDefault();
-    setTaskUploadClicked(true);
+    setButtonDisable(true);
+
     const formData = new FormData(e.currentTarget);
     if (task.id) {
       formData.append("id", task.id.toString());
     }
     const file = formData.get("file") as File | null;
     if (!file || file.name === "") {
+      setButtonDisable(false);
       return;
     }
 
@@ -262,6 +267,7 @@ export default function LessonCard({
   };
 
   const handleDeleteTask = async () => {
+    setButtonDisable(true);
     try {
       const response = await fetch(`/api/tasks/removeTask`, {
         method: "DELETE",
@@ -272,14 +278,17 @@ export default function LessonCard({
       });
       if (response.ok) {
         window.location.reload();
+        return;
       }
       return response.json();
     } catch (error) {
+      setButtonDisable(false);
       console.error("Fetch failed:", error);
     }
   };
 
   const handleRemoveResource = async (downloadURL: string) => {
+    setButtonDisable(true);
     try {
       const response = await fetch(`/api/resources/removeResourceFromTask`, {
         method: "DELETE",
@@ -290,9 +299,11 @@ export default function LessonCard({
       });
       if (response.ok) {
         window.location.reload();
+        return;
       }
       return response.json();
     } catch (error) {
+      setButtonDisable(false);
       console.error("Fetch failed:", error);
     }
   };
@@ -405,7 +416,7 @@ export default function LessonCard({
                   )}`}</span>
                 </DialogDescription>
               </DialogHeader>
-              {myFromTask && myFromTask.length > 0 && userRole === "USER" ? (
+              {myFromTask && myFromTask.length > 0 && userRole === "USER" && (
                 <DialogFooter>
                   <div className="flex flex-col gap-2">
                     {myFromTask.map((task: SolvedTask) => (
@@ -415,6 +426,7 @@ export default function LessonCard({
                       >
                         <Button
                           variant="link"
+                          disabled={buttonDisable}
                           onClick={() =>
                             handleDownload(task.downloadURL, task.fileName)
                           }
@@ -423,6 +435,7 @@ export default function LessonCard({
                         </Button>
                         <Button
                           variant="destructive"
+                          disabled={buttonDisable}
                           size={"sm"}
                           onClick={() => handleRemoveResource(task.downloadURL)}
                         >
@@ -432,7 +445,8 @@ export default function LessonCard({
                     ))}
                   </div>
                 </DialogFooter>
-              ) : (
+              )}
+              {myFromTask && myFromTask.length <= 0 && userRole === "USER" && (
                 <DialogFooter>
                   <form
                     onSubmit={handleSubmitTask}
@@ -443,7 +457,7 @@ export default function LessonCard({
                       variant={"default"}
                       size={"sm"}
                       type="submit"
-                      disabled={taskUploadClicked}
+                      disabled={buttonDisable}
                     >
                       Submit
                     </Button>
@@ -571,13 +585,18 @@ export default function LessonCard({
                           </FormItem>
                         )}
                       />
-                      <Button className="w-[120px]" type="submit">
+                      <Button
+                        className="w-[120px]"
+                        type="submit"
+                        disabled={buttonDisable}
+                      >
                         Update task
                       </Button>
                     </form>
                   </Form>
                   <Button
                     variant="destructive"
+                    disabled={buttonDisable}
                     className="w-[120px] absolute right-5 bottom-5"
                     onClick={handleDeleteTask}
                   >

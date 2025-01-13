@@ -55,6 +55,7 @@ const formSchema: z.ZodSchema = z
 export default function ChangePassword() {
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,6 +67,7 @@ export default function ChangePassword() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setButtonDisabled(true);
     const data = {
       currentPassword: values.currentPassword,
       newPassword: values.newPassword,
@@ -81,6 +83,7 @@ export default function ChangePassword() {
       });
 
       if (!response.ok) {
+        setButtonDisabled(false);
         setError(true);
         setSuccess(false);
         return;
@@ -88,6 +91,7 @@ export default function ChangePassword() {
       setError(false);
       setSuccess(true);
       window.location.reload();
+      return;
     } catch (error) {
       console.error("Password change failed:", error);
     }
@@ -163,7 +167,11 @@ export default function ChangePassword() {
                 </FormItem>
               )}
             />
-            <Button className="w-[150px]" type="submit">
+            <Button
+              className="w-[150px]"
+              type="submit"
+              disabled={buttonDisabled}
+            >
               Change password
             </Button>
           </form>

@@ -78,8 +78,9 @@ export const columns: ColumnDef<AllFromTask>[] = [
   },
   {
     accessorKey: "status",
-    accessorFn: (row) =>
-      (row.state === "0" && "❌") || (row.state === "1" && "☑️") || "✅",
+    accessorFn: (row) => {
+      return (row.state === "0" && "❌") || (row.state === "1" && "☑️") || "✅";
+    },
     header: ({ column }) => {
       return (
         <Button
