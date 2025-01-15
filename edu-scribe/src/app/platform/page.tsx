@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Label, Pie, PieChart } from "recharts";
 import {
   Card,
   CardContent,
@@ -35,6 +36,7 @@ import {
 } from "@/components/ui/chart";
 import { Course, columns } from "./columns";
 import { DataTable } from "./data-table";
+import { TeacherDataTable } from "./teacher-data-table";
 import { Separator } from "@/components/ui/separator";
 
 interface CourseData {
@@ -51,6 +53,12 @@ interface ChartData {
   fill: string;
 }
 
+interface DoneTasksChartData {
+  course: string;
+  tasks: number;
+  fill: string;
+}
+
 interface DateChartData {
   date: string;
   users: number;
@@ -60,6 +68,28 @@ interface DateChartData {
 const chartConfig = {
   students: {
     label: "Students",
+  },
+  english: {
+    label: "English",
+    color: "hsl(var(--chart-1))",
+  },
+  italiano: {
+    label: "Italiano",
+    color: "hsl(var(--chart-2))",
+  },
+  francais: {
+    label: "Français",
+    color: "hsl(var(--chart-3))",
+  },
+  deutsh: {
+    label: "Deutsch",
+    color: "hsl(var(--chart-4))",
+  },
+} satisfies ChartConfig;
+
+const doneTasksChartConfig = {
+  tasks: {
+    label: "Tasks",
   },
   english: {
     label: "English",
@@ -135,6 +165,19 @@ const formatChartData = (data: CourseData): ChartData[] => {
     .sort((a, b) => a.course.localeCompare(b.course));
 };
 
+const formatDoneTasksChartData = (data: CourseData): DoneTasksChartData[] => {
+  return Object.entries(data)
+    .map(([course, tasks]) => {
+      const [language] = course.split(" ");
+      return {
+        course,
+        tasks,
+        fill: colorMap[language] || "var(--color-primary)",
+      };
+    })
+    .sort((a, b) => a.course.localeCompare(b.course));
+};
+
 const formatDateChartData = (data: DateCharteData): DateChartData[] => {
   return Object.entries(data)
     .map(([date, users]) => {
@@ -154,7 +197,14 @@ export default function Platform() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [dateChartData, setDateChartData] = useState<DateChartData[]>([]);
+  const [doneTasksChartData, setDoneTasksChartData] = useState<
+    DoneTasksChartData[]
+  >([]);
   const total = dateChartData.reduce((acc, { users }) => acc + users, 0);
+  const totalTasks = doneTasksChartData.reduce(
+    (acc, { tasks }) => acc + tasks,
+    0
+  );
 
   const fetchMyCoursesTeacher = async () => {
     try {
@@ -227,6 +277,26 @@ export default function Platform() {
       }
       const data = await response.json();
       setDateChartData(formatDateChartData(data));
+    } catch (error) {
+      console.error("Data fetch failed:", error);
+    }
+  };
+
+  const getDoneTasksChartData = async () => {
+    try {
+      const response = await fetch("/api/resources/myProgress", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Couldn't fetch data.");
+      }
+      const data = await response.json();
+      setDoneTasksChartData(formatDoneTasksChartData(data));
+      return;
     } catch (error) {
       console.error("Data fetch failed:", error);
     }
@@ -335,6 +405,7 @@ export default function Platform() {
       });
     } else if (currentUser.role === "USER") {
       getNotificationsUser();
+      getDoneTasksChartData();
       fetchMyCoursesUser().then((data) => {
         setCourses(data);
       });
@@ -597,7 +668,7 @@ export default function Platform() {
             </h1>
             <div className="flex flex-row gap-4 justify-between mt-10">
               <div className="w-[1000px] h-[600px]">
-                <DataTable columns={columns} data={courses} />
+                <TeacherDataTable columns={columns} data={courses} />
               </div>
               <Separator orientation="vertical" className="h-[660px] mx-10" />
               <div className="flex flex-col gap-4 w-[320px]">
@@ -688,75 +759,76 @@ export default function Platform() {
               <h1 className="text-5xl font-extrabold">
                 Hi {currentUser?.firstName}! 👋
               </h1>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant={"link"}
-                    className="w-auto flex flex-row items-center justify-center"
-                  >
-                    Need help
-                    <MessageCircleQuestion size={20} className="mb-2" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="font-semibold text-2xl">
-                      How to navigate the plarform
-                    </DialogTitle>
-                    <DialogDescription className="text-dark/80 text-base">
-                      One the left of the screen there is a sidebar that
-                      contains all shortcuts you need.
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <ul className="flex flex-col gap-6 mt-6 mb-10">
-                    <li>
-                      <h1 className="text-lg font-semibold mb-2">
-                        1. Sidebar navigation
-                      </h1>
-                      <p className="text-dark/80">
-                        One the left of the screen there is a sidebar that
-                        contains all shortcuts you need.
-                      </p>
-                    </li>
-                    <li>
-                      <h1 className="text-lg font-semibold mb-2">
-                        2. User account
-                      </h1>
-                      <p className="text-dark/80">
-                        If you want to access your personal account information,
-                        just click the avatar in top right corner of the
-                        platform.
-                      </p>
-                    </li>
-                    <li>
-                      <h1 className="text-lg font-semibold mb-2">
-                        3. Notifications
-                      </h1>
-                      <p className="text-dark/80">
-                        Notifications are located in the right side of the
-                        platform and contain all tasks you got in past few days
-                        with their deadlines included. Keep an eye on them not
-                        to miss your lessons!
-                      </p>
-                    </li>
-                    <li>
-                      <h1 className="text-lg font-semibold mb-2">
-                        4. Home page
-                      </h1>
-                      <p className="text-dark/80">
-                        On the home page you can find quick access to all of
-                        your courses and a chart that illustrates how many tasks
-                        you have done in courses.
-                      </p>
-                    </li>
-                  </ul>
-                </DialogContent>
-              </Dialog>
             </div>
             <div className="flex flex-row gap-4 justify-between mt-7">
-              <div className="w-[1000px] h-[500px]">
+              <div className="w-[1000px] h-[500px] flex flex-row gap-4">
                 <DataTable columns={columns} data={courses} />
+                <Card className="flex flex-col w-[500px] h-[500px]">
+                  <CardHeader className="items-center pb-0">
+                    <CardTitle>Course Task Completion</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 pb-0">
+                    <ChartContainer
+                      config={doneTasksChartConfig}
+                      className="mx-auto aspect-square h-full w-full"
+                    >
+                      {totalTasks === 0 ? (
+                        <h1 className="text-center text-lg font-semibold text-dark/80 w-full h-full flex items-center justify-center">
+                          You have no tasks in any course. Start by enrolling in
+                          a course!
+                        </h1>
+                      ) : (
+                        <PieChart>
+                          <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent hideLabel />}
+                          />
+                          <Pie
+                            data={doneTasksChartData}
+                            dataKey="tasks"
+                            nameKey="course"
+                            innerRadius={120}
+                            strokeWidth={5}
+                          >
+                            <Label
+                              content={({ viewBox }) => {
+                                if (
+                                  viewBox &&
+                                  "cx" in viewBox &&
+                                  "cy" in viewBox
+                                ) {
+                                  return (
+                                    <text
+                                      x={viewBox.cx}
+                                      y={viewBox.cy}
+                                      textAnchor="middle"
+                                      dominantBaseline="middle"
+                                    >
+                                      <tspan
+                                        x={viewBox.cx}
+                                        y={viewBox.cy}
+                                        className="fill-foreground text-3xl font-bold"
+                                      >
+                                        {totalTasks}
+                                      </tspan>
+                                      <tspan
+                                        x={viewBox.cx}
+                                        y={(viewBox.cy || 0) + 24}
+                                        className="fill-muted-foreground"
+                                      >
+                                        Total Tasks
+                                      </tspan>
+                                    </text>
+                                  );
+                                }
+                              }}
+                            />
+                          </Pie>
+                        </PieChart>
+                      )}
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
               </div>
               <div className="flex flex-col gap-4 w-[320px]">
                 <div className="flex flex-row gap-2 items-center justify-end">
@@ -823,6 +895,77 @@ export default function Platform() {
                   </div>
                 )}
               </div>
+            </div>
+            <div className="mt-16 flex flex-col gap-2">
+              <h1 className="font-extrabold text-4xl">Need help?</h1>
+              <p className="font-semibold text-2xl">
+                Here are some tips to help you navigate on the platform.
+              </p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant={"default"}
+                    className="w-[140px] flex flex-row items-center justify-center mt-2"
+                  >
+                    Help
+                    <MessageCircleQuestion size={20} className="mb-1" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="font-semibold text-2xl">
+                      How to navigate the plarform
+                    </DialogTitle>
+                    <DialogDescription className="text-dark/80 text-base">
+                      One the left of the screen there is a sidebar that
+                      contains all shortcuts you need.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <ul className="flex flex-col gap-6 mt-6 mb-10">
+                    <li>
+                      <h1 className="text-lg font-semibold mb-2">
+                        1. Sidebar navigation
+                      </h1>
+                      <p className="text-dark/80">
+                        One the left of the screen there is a sidebar that
+                        contains all shortcuts you need.
+                      </p>
+                    </li>
+                    <li>
+                      <h1 className="text-lg font-semibold mb-2">
+                        2. User account
+                      </h1>
+                      <p className="text-dark/80">
+                        If you want to access your personal account information,
+                        just click the avatar in top right corner of the
+                        platform.
+                      </p>
+                    </li>
+                    <li>
+                      <h1 className="text-lg font-semibold mb-2">
+                        3. Notifications
+                      </h1>
+                      <p className="text-dark/80">
+                        Notifications are located in the right side of the
+                        platform and contain all tasks you got in past few days
+                        with their deadlines included. Keep an eye on them not
+                        to miss your lessons!
+                      </p>
+                    </li>
+                    <li>
+                      <h1 className="text-lg font-semibold mb-2">
+                        4. Home page
+                      </h1>
+                      <p className="text-dark/80">
+                        On the home page you can find quick access to all of
+                        your courses and a chart that illustrates how many tasks
+                        you have done in courses.
+                      </p>
+                    </li>
+                  </ul>
+                </DialogContent>
+              </Dialog>
             </div>
             <div className="absolute right-0 bottom-0">
               <Image

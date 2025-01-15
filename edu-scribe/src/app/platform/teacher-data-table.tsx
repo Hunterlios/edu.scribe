@@ -25,7 +25,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
-export function DataTable<TData extends { id?: number }, TValue>({
+export function TeacherDataTable<TData extends { id?: number }, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -50,7 +50,7 @@ export function DataTable<TData extends { id?: number }, TValue>({
   return (
     <div>
       <div className="rounded-md border bg-dark">
-        <Table className="h-[500px] w-[500px]">
+        <Table className="h-[650px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
